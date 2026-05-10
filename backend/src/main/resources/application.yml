@@ -1,0 +1,74 @@
+spring:
+  application:
+    name: dist-mail
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=distmail;encrypt=false;trustServerCertificate=true
+    username: ezn
+    password: 1234
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: dbo
+    open-in-view: false
+  flyway:
+    enabled: true
+    default-schema: dbo
+    schemas: dbo
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: dist-mail-consumer
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.distmail.domain
+        spring.json.value.default.type: com.distmail.domain.MailTaskMessage
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      cors:
+        allowed-origins: http://localhost:3000
+        allowed-methods: GET,OPTIONS
+        allowed-headers: "*"
+
+distmail:
+  cors:
+    allowed-origins: http://localhost:3000
+  thread-count: 16
+  queue-capacity: 10000
+  rate-window-emails: 10000
+  rate-window: 1s
+  failure-rate: 0.08
+  smtp-delay-min-ms: 5
+  smtp-delay-max-ms: 20
+  max-retries: 3
+  retry-backoff: 500ms
+  pool-mode: FIXED
+  topic: dist-mail.tasks
+  consumer-group: dist-mail-consumer
+  consumer-concurrency: 8
+  dashboard-interval-seconds: 3
+  poison-pill-count: 32
+  bootstrap:
+    enabled: false
+    total-emails: 10000
+
+logging:
+  level:
+    com.distmail: INFO

@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:distmail;MODE=MSSQLServer;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+  kafka:
+    listener:
+      auto-startup: false
+
+distmail:
+  thread-count: 2
+  queue-capacity: 50
+  rate-window-emails: 100
+  rate-window: 1s
+  failure-rate: 0.0
+  smtp-delay-min-ms: 1
+  smtp-delay-max-ms: 1
+  max-retries: 1
+  retry-backoff: 100ms
+  pool-mode: FIXED
+  topic: test-topic
+  consumer-group: test-group
+  consumer-concurrency: 1
+  dashboard-interval-seconds: 10
+  poison-pill-count: 2
+  bootstrap:
+    enabled: false
